@@ -36,11 +36,11 @@ public class JournalController {
     }
 
 
-    @PostMapping
-    public ResponseEntity<JournalEntity> addJournal(@RequestBody JournalEntity journal) {
+    @PostMapping("/user/{username}")
+    public ResponseEntity<JournalEntity> addJournal(@PathVariable String username,@RequestBody JournalEntity journal) {
         journal.setCreatedAt(LocalDateTime.now());
         journal.setUpdatedAt(LocalDateTime.now());
-        JournalEntity journalEntity=journalService.createJournal(journal);
+        JournalEntity journalEntity=journalService.createJournal(journal,username);
         return ResponseEntity.status(HttpStatus.CREATED).body(journalEntity);
     }
 
@@ -53,9 +53,10 @@ public class JournalController {
     }
 
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteJournal(@PathVariable("id") ObjectId id) {
-        journalService.deleteJournal(id);
+    @DeleteMapping("/{id}/user/{username}")
+    public ResponseEntity<Void> deleteJournal(@PathVariable ObjectId id,
+                                              @PathVariable("username") String username) {
+        journalService.deleteJournal(id,username);
         return ResponseEntity.noContent().build();
     }
 

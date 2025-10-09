@@ -1,6 +1,7 @@
 package com.learnspring.journalapp.services;
 import java.util.List;
 import com.learnspring.journalapp.entities.JournalEntity;
+import com.learnspring.journalapp.entities.UserEntity;
 import com.learnspring.journalapp.repository.JournalRepository;
 
 import org.bson.types.ObjectId;
@@ -10,14 +11,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class JournalService {
     private final JournalRepository journalRepository;
-    public JournalService(JournalRepository journalRepository) {
+    private  final UserService userService;
+    public JournalService(JournalRepository journalRepository, UserService userService) {
         this.journalRepository = journalRepository;
+        this.userService = userService;
     }
 
     // Create journal
-    public JournalEntity createJournal(JournalEntity journal) {
-        System.out.println(journal);
-        return journalRepository.save(journal);
+    public JournalEntity createJournal(JournalEntity journal, String username) {
+        UserEntity user=userService.findByUsername(username);
+        JournalEntity userJournal=journalRepository.save(journal);
+        user.getJournals().add(userJournal);
+        userService.saveUser(user);
+        return userJournal;
     }
 
     // get single journal
@@ -41,7 +47,10 @@ public class JournalService {
     }
 
     // delete journal
-    public void deleteJournal(ObjectId id) {
+    public void deleteJournal(ObjectId id,String username) {
+        UserEntity user=userService.findByUsername(username);
+        user.getJournals().remove(journalRepository.findById(id).orElse(null));
+        userService.saveUser(user);
         journalRepository.deleteById(id);
     }
 
