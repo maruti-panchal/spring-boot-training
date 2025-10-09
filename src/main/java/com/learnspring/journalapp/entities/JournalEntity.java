@@ -18,4 +18,5 @@ public class JournalEntity {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String author;
 }

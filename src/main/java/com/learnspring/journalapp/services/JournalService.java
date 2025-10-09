@@ -6,6 +6,7 @@ import com.learnspring.journalapp.repository.JournalRepository;
 
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
@@ -18,8 +19,10 @@ public class JournalService {
     }
 
     // Create journal
+    @Transactional
     public JournalEntity createJournal(JournalEntity journal, String username) {
         UserEntity user=userService.findByUsername(username);
+        journal.setAuthor(user.getUsername());
         JournalEntity userJournal=journalRepository.save(journal);
         user.getJournals().add(userJournal);
         userService.saveUser(user);
