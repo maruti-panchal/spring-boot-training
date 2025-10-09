@@ -4,6 +4,8 @@ import com.learnspring.journalapp.JournalAppApplication;
 import com.learnspring.journalapp.entities.JournalEntity;
 import com.learnspring.journalapp.services.JournalService;
 import org.bson.types.ObjectId;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -22,34 +24,48 @@ public class JournalController {
     }
 
     @GetMapping("/{id}")
-    public JournalEntity getJournal(@PathVariable("id") ObjectId id) {
-        return journalService.getJournalById(id);
+    public ResponseEntity<?> getJournal(@PathVariable("id") ObjectId id) {
+        JournalEntity journal = journalService.getJournalById(id);
+
+        if (journal == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Journal not found for ID: " + id);
+        }
+
+        return ResponseEntity.ok(journal);
     }
 
+
     @PostMapping
-    public JournalEntity addJournal(@RequestBody JournalEntity journal) {
+    public ResponseEntity<JournalEntity> addJournal(@RequestBody JournalEntity journal) {
         journal.setCreatedAt(LocalDateTime.now());
         journal.setUpdatedAt(LocalDateTime.now());
-        return journalService.createJournal(journal);
+        JournalEntity journalEntity=journalService.createJournal(journal);
+        return ResponseEntity.status(HttpStatus.CREATED).body(journalEntity);
     }
 
 
     @PutMapping("/{id}")
-    public JournalEntity upadteJournal(@PathVariable("id") ObjectId id, @RequestBody JournalEntity journal) {
+    public ResponseEntity<JournalEntity> upadteJournal(@PathVariable("id") ObjectId id, @RequestBody JournalEntity journal) {
         journal.setUpdatedAt(LocalDateTime.now());
-        return journalService.updateJournal(id,journal);
+        JournalEntity journalEntity=journalService.updateJournal(id,journal);
+        return ResponseEntity.ok(journalEntity);
     }
 
 
     @DeleteMapping("/{id}")
-    public boolean deleteJournal(@PathVariable("id") ObjectId id) {
+    public ResponseEntity<Void> deleteJournal(@PathVariable("id") ObjectId id) {
         journalService.deleteJournal(id);
-        return true;
+        return ResponseEntity.noContent().build();
     }
 
 
     @GetMapping()
-    public List<JournalEntity> getAllJournals(){
-        return journalService.getAllJournals();
+    public ResponseEntity<List<JournalEntity>> getAllJournals(){
+        List<JournalEntity> journalEntities=journalService.getAllJournals();
+        if(!journalEntities.isEmpty()){
+            return ResponseEntity.ok(journalEntities);
+        }
+        return ResponseEntity.noContent().build();
     }
 }
